@@ -1,5 +1,5 @@
 // environment_v2.js
-// Written by Aaron Seibel
+// Written primarily by Aaron Seibel
 // Last modified on 12/13/2018
 
 // Predefined object containing all types of signals.
@@ -125,7 +125,7 @@ class Body {
     this.angle = theta;
     this.axisOffsetX = axisX * w;
     this.axisOffsetY = axisY * h;
-    this.pivot = createVector(x + w * (axisX), y - h * (axisY));
+    this.pivot = createVector(x + w * axisX, y - h * axisY);
     this.mass = 0.0005 * w * h;
     this.moment = this.mass * (w * w * (axisX * axisX - axisX + 1/3) + h * h * (axisY * axisY - axisY + 1/3));
     this.children = [];

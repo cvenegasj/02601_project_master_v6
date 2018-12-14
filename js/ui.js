@@ -1,3 +1,6 @@
+// ui.js
+// Last modified on 12/13/18
+
 var resetButton;
 var moduleSelect;
 var randomizeNCCheckbox;

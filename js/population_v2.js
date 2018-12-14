@@ -1,14 +1,15 @@
 // population_v2.js
+// Written primarily by Carlos Venegas
 // Last modified on 12/13/18
 
 // Predefined objects with default values for a specific type of population. 
 const TRAFFIC = {
     tag: "traffic",
     size: 12,
-    sensorTypes: [SIGNAL_TYPE.HAZARD],
+    sensorTypes: [SIGNAL_TYPE.HAZARD, SIGNAL_TYPE.HAZARD],
     signal: SIGNAL_TYPE.HAZARD,
     color: [100, 100, 100],
-    brain: [AVOID]
+    brain: [AVOID, CURIOUSITY]
 }
 
 const FOOD_FINDER = {
@@ -142,10 +143,6 @@ class Population {
         this.matingPool = []; // matingPool will have length 100
         this.sortVehiclesByFitnessScore(); // Order vehicles in decreasing order of fitnessScore.
 
-        for (let v of this.vehicles) {
-            console.log(v.fitnessScore)
-        }
-
         // find total of all fitness scores
         let total = 0;
         for (let i = 0; i < this.size; i++) {
@@ -176,7 +173,9 @@ class Population {
 
         // Copy the the champions from previous generation. 
         for (let i = 0; i < config.numberCopied; i++) {
-            this.champions[i].fitnessScore = 0;
+            var champ = this.champions[i];
+            champ.fitnessScore = 0;
+            champ.color = [230, 0, 230];
             this.addVehicle(this.champions[i]);
         }
 
@@ -193,10 +192,15 @@ class Population {
             } while(parent1.id === parent2.id);
 
             // Obtain a child object with genome product of parents's genome crossover.
-            child = Vehicle.mate(parent1, parent2);
+            child = Vehicle.crossover(parent1, parent2);
 
             // add new child to population
             this.addVehicle(child);
+        }
+
+        // rebalance neural circuits to account for new layers
+        for (let v of this.vehicles) {
+            v.balanceNC();
         }
     }
 

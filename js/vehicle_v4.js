@@ -1,5 +1,5 @@
 // vehicle_v4.js
-// Written by Aaron Seibel
+// Written primarily by Aaron Seibel
 // Last modified on 12/13/18
 
 // Vehicle class definition.
@@ -62,8 +62,8 @@ class Vehicle {
     this.body.addChild(s);
   }
 
-  // connectNeuralCircuit is a utility function that adds Neurons to the Vehicle's Neural Circuit
-  // for each of its effectors and sensors. It also adds synapses to the Neural Circuit according to the genome.
+  // connectNeuralCircuit adds Neurons to the Vehicle's Neural Circuit for each of its effectors and sensors. 
+  // It also adds hidden nodes synapses to the Neural Circuit according to the genome.
   connectNeuralCircuit() {
     // Create neurons and synapses in brain. Initialize layers.
     this.brain.layers = [];
@@ -140,10 +140,10 @@ class Vehicle {
     dAvg = (dL + dR) / 2;
     theta = (dL - dR) / (abs(EL.x) + abs(ER.x));
 
-    // reward vehicles in traffic for forward movement
+    // reward vehicles in traffic for straight, forward movement
     if (this.population.tag == "traffic") {
       if (dAvg > 0) {
-        this.fitnessScore += dAvg;
+        this.fitnessScore += dAvg - abs(theta);
       }
 
     // reward conservative movement for certain vehicle types
@@ -204,7 +204,7 @@ class Vehicle {
       for (let p of world.populations) {
         if (p.tag == "predator") {
           closest = Infinity;
-          for (let v of p) {
+          for (let v of p.vehicles) {
             d = p5.Vector.dist(v.body.position, this.body.position);
             if (d < closest) {
               closest = d;
@@ -221,7 +221,7 @@ class Vehicle {
     } else if (this.population.tag == "predator") {
       for (let p of world.populations) {
         if (p.tag == "prey") {
-          for (let v of p) {
+          for (let v of p.vehicles) {
             d = p5.Vector.dist(v.body.position, this.body.position);
             if (d < 2 * this.body.width) { // collision detected
               this.fitnessScore += 20;
@@ -234,14 +234,16 @@ class Vehicle {
     } else if (this.population.tag == "cluster") {
       for (let p of world.populations) {
         if (p == this.population) {
-          closest = Infinity;
+          closest = 10000;
           for (let v of p.vehicles) {
-            d = p5.Vector.dist(v.body.position, this.body.position);
-            if (d < closest) {
-              closest = d;
-            }     
-          }
-          this.fitnessScore += 100 / closest;
+            if (v != this) {
+              d = p5.Vector.dist(v.body.position, this.body.position);
+              if (d < closest) {
+                closest = d;
+              }     
+            }
+            this.fitnessScore += 100 / closest;
+            }            
         }
       }
 
@@ -259,69 +261,108 @@ class Vehicle {
     pop();
   }
 
-  /***************** genetics (Carlos) *****************/
+  // crossover function creates a new genome from a combination of current object's genome and the partner's genome.
+  static crossover(p1, p2) {
 
-  // mate function creates a new genome from a normal crossover of current object's genome and the partner's genome.
-  static mate(parent1, parent2) {
-    var child = new Vehicle(random(canvasWidth), random(canvasHeight), parent1.population);
+    let child = new Vehicle(random(canvasWidth), random(canvasHeight), p1.population);
 
     // create new genome
-    child.genome = new Genome();
-    child.genome = Genome.crossover(parent1.genome, parent2.genome);
-    
-    // random structural mutations
-    child.genome.mutate(child.population.newSynapseMutationRate, child.population.newNeuronMutationRate, child.population.genePool);
+    let g = new Genome();
 
-    // Construct new neural circuit structure according to the genome.
+    let p2Genes = []; let p1Genes = [];
+    for (let sg1 of p1.genome.synapseGenes) {
+      for (let sg2 of p2.genome.synapseGenes) {
+        if (sg1.id == sg2.id) {   // matching genes
+          if (random() < 0.5) {
+            g.addSynapseGene(sg2);
+            g.addNeuronGene(sg2.from);
+            g.addNeuronGene(sg2.to);
+            p2Genes.push([sg2]);
+          } else {
+            g.addSynapseGene(sg1);
+            g.addNeuronGene(sg1.from);
+            g.addNeuronGene(sg1.to);
+            p1Genes.push(sg1);
+          }
+        } else {  // incompatible genes
+          g.addSynapseGene(sg1);
+          g.addNeuronGene(sg1.from);
+          g.addNeuronGene(sg1.to);
+          p1Genes.push(sg1)
+        }
+      }
+    }
+
+    // random structural mutations
+    g.mutate(child.population.newSynapseMutationRate, child.population.newNeuronMutationRate, child.population.genePool)
+
+    // construct new neural circuit structure
+    child.genome = g;
     child.connectNeuralCircuit();
 
-    // Inherit weights, biases, and thresholds of child's synapses from parents's brains.
-    for (let i = 0; i < child.brain.synapses.length; i++) {
-      let syn = child.brain.synapses[i];
-      let s1 = parent1.brain.getSynapseById(syn.id);
-      let s2 = parent2.brain.getSynapseById(syn.id);
-      
-      if (s1 != null && s2 != null) { // Inherited from both. Average them.
-          syn.weight = (s1.weight + s2.weight) / 2;
-          // pre synapse
-          syn.pre.threshold = (s1.pre.threshold + s2.pre.threshold) / 2;
-          syn.pre.bias = (s1.pre.bias + s2.pre.bias) / 2;
-          // post synapse
-          syn.post.threshold = (s1.post.threshold + s2.post.threshold) / 2;
-          syn.post.bias = (s1.post.bias + s2.post.bias) / 2;
+    // inherit weights, biases, and thresholds
+    for (let s of child.brain.synapses) {
 
-      } else if (s1 != null) { // Inherited from parent1.
-          syn.weight = s1.weight;
-          // pre synapse
-          syn.pre.threshold = s1.pre.threshold;
-          syn.pre.bias = s1.pre.bias;
-          // post synapse
-          syn.post.threshold = s1.post.threshold;
-          syn.post.bias = s1.post.bias;
+      let sg = p2.genome.getSynapseGeneById(s.ID);
 
-      } else if (s2 != null) { // Inherited from parent2.
-          syn.weight = s2.weight;
-          // pre synapse
-          syn.pre.threshold = s2.pre.threshold;
-          syn.pre.bias = s2.pre.bias;
-          // post synapse
-          syn.post.threshold = s2.post.threshold;
-          syn.post.bias = s2.post.bias;
+      if (p2Genes.indexOf(sg) >= 0) { // inherited from p2
+        let s2 = p2.brain.getSynapseById(s.ID);
+        s.weight = s2.weight;
+        s.post.threshold = s2.post.threshold;
+        s.post.bias = s2.post.bias;
+      } else if (p1Genes.indexOf(sg) >= 0) {  // inherited from p1
+        let s2 = p1.brain.getSynapseById(s.ID);
+        s.weight = s2.weight;
+        s.post.threshold = s2.post.threshold;
+        s.post.bias = s2.post.bias;
+      } else {
+        s.weight = random(-1,1);
+        s.post.threshold = random();
+        s.post.bias = random(-1, 1)
+      }
+    }
 
-      } else { // Not inherited from any parent.
-          syn.weight = random(-1, 1);
-          // pre synapse
-          syn.pre.threshold = random(0, 1);
-          syn.pre.bias = random(-1, 1);
-          // post synapse
-          syn.post.threshold = random(0, 1);
-          syn.post.bias = random(-1, 1);
+    // apply random mutations to non-structral properties of NC
+    for (let s of child.brain.synapses) {
+      if (random() < child.population.randomWeightMutationRate) {
+        s.weight = random(-1, 1);
+      }
+    }
+
+    for (let l of child.brain.layers) {
+      for (let n of l) {
+        if (random() < child.population.randomBiasMutationRate) {
+          if (! n instanceof SensorNeuron) {
+            n.bias = random(-1, 1);
+          }
+        }
+        if (random() < child.population.randomThresholdMutationRate) {
+          n.threshold = random();
+        }
       }
     }
 
     return child;
   }
 
+  // balanceNC iterates over all of the neuron genes in the genome and adjusts the corresponding node layer to account 
+  // for mutations that occured in other vehicles
+  balanceNC() {
+  
+    if (this.brain.layers.length != this.population.genePool.layers.length) {
+      for (let ng of this.genome.outputNeuronGenes) {
+        var n = this.brain.getNeuronById(ng.id)
+        if (n.layer != ng.layer) {
+          if (this.brain.layers[ng.layer] == null) {
+            this.brain.layers.splice(ng.layer, 0, []);
+          }
+          this.brain.layers[ng.layer].push(n);
+          this.brain.layers[n.layer].splice(this.brain.layers[n.layer].indexOf(n), 1);
+          n.layer = ng.layer;
+        }
+      }
+    }
+  }
 }
 
 // Sensor class definition

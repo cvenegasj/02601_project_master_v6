@@ -1,5 +1,5 @@
 // genePool_v2.js
-// Written by Carlos Venegas
+// Written by primarily by Carlos Venegas
 // Last updated on 12/13/18
 
 class GenePool {
@@ -53,6 +53,7 @@ class GenePool {
     // It also updates the layer numbering for all nodes whose layer is > newLayerIndex
     addLayer(index) {
       this.layers.splice(index, 0, []);
+      
       // update layer attribute of all NeuronGenes in any layer > index
       for (let i = index + 1; i < this.layers.length; i++) {
         for (let j = 0; j < this.layers[i].length; j++) {

@@ -90,7 +90,7 @@ function setup() {
 }
 
 function draw() {
-  background(230);
+  background(245);
 
   world.update();
   world.render();

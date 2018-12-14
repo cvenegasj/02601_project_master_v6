@@ -1,5 +1,5 @@
 // genome_v2.js
-// Written by Carlos Venegas
+// Written primarily by Carlos Venegas
 // Last modified on 12/13/18
 
 const DISABLED = {
@@ -11,27 +11,27 @@ const DISABLED = {
   }
   
   const SLOW = {
-    newNeuron: 0.1,
-    newSynapse: 0.1,
+    newNeuron: 0.05,
+    newSynapse: 0.2,
     randomWeight: 0.3,
     randomBias: 0.1,
     randomThreshold: 0.1
   }
   
   const MEDIUM = {
-    newNeuron: 0.3,
-    newSynapse: 0.3,
-    randomWeight: 0.3,
-    randomBias: 0.3,
-    randomThreshold: 0.3
+    newNeuron: 0.125,
+    newSynapse: 0.4,
+    randomWeight: 0.45,
+    randomBias: 0.2,
+    randomThreshold: 0.2
   }
   
   const FAST = {
-    newNeuron: 0.5,
-    newSynapse: 0.5,
-    randomWeight: 0.5,
-    randomBias: 0.5,
-    randomThreshold: 0.5
+    newNeuron: 0.2,
+    newSynapse: 0.6,
+    randomWeight: 0.6,
+    randomBias: 0.2,
+    randomThreshold: 0.2
   }
 
 class Genome {
@@ -55,29 +55,29 @@ class Genome {
 
     // crossover creates a new genome from the two received genomes.
     // If both parents have the same synapse gene, inherit it. If only of them has it, inherit it randomly.
-    static crossover(genome1, genome2) {
-        var newGenome = new Genome();
-        var allSynapseGenes = genome1.combineSynapseGenesNoRepeat(genome2);
+    // static crossover(genome1, genome2) {
+    //     var newGenome = new Genome();
+    //     var allSynapseGenes = genome1.combineSynapseGenesNoRepeat(genome2);
 
-        // order edges from lower layers to higher
-        allSynapseGenes.sort(function(a,b){return a.from.layer - b.from.layer}); // check if in correct order!!!!!*******
+    //     // order edges from lower layers to higher
+    //     allSynapseGenes.sort(function(a,b){return a.from.layer - b.from.layer});
         
-        for (let i = 0; i < allSynapseGenes.length; i++) {
-            // If both genomes have synapse i, inherit it.
-            if (genome1.containsSynapseGene(allSynapseGenes[i]) && genome2.containsSynapseGene(allSynapseGenes[i])) {
-                newGenome.addNeuronGene(allSynapseGenes[i].from);
-                newGenome.addNeuronGene(allSynapseGenes[i].to);
-                newGenome.addSynapseGene(allSynapseGenes[i]);
-            } else if (random(1) < 0.5) { // Inherit randomly otherwise (flip a coin).
-                if (newGenome.containsNeuronGene(allSynapseGenes[i].from)) { // Check if origin neuron exists, so we can add a new outgoing edge from it.
-                    newGenome.addNeuronGene(allSynapseGenes[i].to);
-                    newGenome.addSynapseGene(allSynapseGenes[i]); 
-                }
-            }
-        }
+    //     for (let i = 0; i < allSynapseGenes.length; i++) {
+    //         // If both genomes have synapse i, inherit it.
+    //         if (genome1.containsSynapseGene(allSynapseGenes[i]) && genome2.containsSynapseGene(allSynapseGenes[i])) {
+    //             newGenome.addNeuronGene(allSynapseGenes[i].from);
+    //             newGenome.addNeuronGene(allSynapseGenes[i].to);
+    //             newGenome.addSynapseGene(allSynapseGenes[i]);
+    //         } else if (random(1) < 0.5) { // Inherit randomly otherwise (flip a coin).
+    //             if (newGenome.containsNeuronGene(allSynapseGenes[i].from)) { // Check if origin neuron exists, so we can add a new outgoing edge from it.
+    //                 newGenome.addNeuronGene(allSynapseGenes[i].to);
+    //                 newGenome.addSynapseGene(allSynapseGenes[i]); 
+    //             }
+    //         }
+    //     }
 
-        return newGenome;
-    }
+    //     return newGenome;
+    // }
 
     // mutate receives the mutation rates and the genePool, and performs randomly 2 types of mutations:
     // Add synapse mutation: selects randomly two neuron genes of my genome and joins them (if not already joined).
@@ -122,7 +122,7 @@ class Genome {
 
         // Check if synapse gene already exists in gene pool.
         let sg = genePool.getSynapseGene(ng1, ng2);
-        
+
         // Create (ng1, ng2) synapse if it does not exist and add it to the gene pool.
         if (sg === null) { 
             let newSg = new SynapseGene(ng1, ng2);
@@ -289,6 +289,26 @@ class Genome {
           if (this.synapseGenes[i].id == id) {
             return s;
           }
+        }
+        return null;
+    }
+
+    // getNeuronGeneById receives an id and checks if a NeuronGene with that id exists in my genome. 
+    getNeuronGeneByID(id) {
+        for (let ng of this.outputNeuronGenes) {
+            if (ng.id == id) {
+                return ng;
+            }
+        }
+        for (let ng of this.neuronGenes) {
+            if (ng.id == id) {
+                return ng;
+            }
+        }
+        for (let ng of this.inputNeuronGenes) {
+            if (ng.id == id) {
+                return ng;
+            }
         }
         return null;
     }

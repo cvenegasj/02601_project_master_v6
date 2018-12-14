@@ -1,5 +1,5 @@
 // brain_v3.js
-// Written by Aaron Seibel
+// Written orimarily by Aaron Seibel
 // Last modified on 12/13/2018
 
 const NODETYPE = {
@@ -122,7 +122,7 @@ class NeuralCircuit {
   // iterating through all the synapses in an order according to the layer of the presynaptic neuron 
   // of each sensor.
   process() {
-
+    
     // get sensor input
     for (var i = 0; i < this.layers[0].length; i++) {
       this.layers[0][i].sensor.sense();
