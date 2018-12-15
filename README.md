@@ -24,5 +24,5 @@ The app runs on the web browser and is executable from the `index.html` file.
 
 ## Authors
 
-* **Aaron Siebel** - <14seibaa@gmail.com>
+* **Aaron Seibel** - <14seibaa@gmail.com>
 * **Carlos Venegas** - <cvj_2311@hotmail.com>
