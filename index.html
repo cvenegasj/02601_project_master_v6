@@ -33,7 +33,7 @@
         }
 
         #control-panel {
-          padding: 15px 20px;
+          padding: 15px 1.8%;
           height: 100%;
           z-index: -100;
           overflow-y: scroll;
@@ -46,22 +46,66 @@
         .select-dropdown * {
           color: rgba(50, 50, 50, 0.8) !important;
         }
+
+        /* Customizing colors for components */
+        input[type=range] {
+          background-color: #ffea00;
+          border: 0 !important;
+        } 
+
+        input[type=range]::-webkit-slider-thumb {
+          background-color: #ffea00;
+          border: 0 !important;
+        }
+        input[type=range]::-moz-range-thumb {
+          background-color: #ffea00;
+          border: 0 !important;
+        }
+        input[type=range]::-ms-thumb {
+          background-color: #ffea00;
+          border: 0 !important;
+        }
+
+        /***** These are to edit the thumb and the text inside the thumb *****/
+        input[type=range] + .thumb {
+          background-color: #ffea00;
+        }
+        input[type=range] + .thumb.active .value {
+          color: rgba(0,0,0,0.87) !important;
+        }
+
+        .switch label input[type=checkbox]:checked+.lever {
+          background-color: #80deea;
+        }
+
+        .switch label input[type=checkbox]:checked+.lever:after  {
+          background-color: #ffea00;
+        }
+
       </style>
   </head>
 
   <body>
     <div>
         <div class="row">
-            <div id="simulation-canvas" class="col s9">
-  
+
+            <div id="simulation-canvas" class="col s12 m9">
             </div>
-            <div id="control-panel" class="col s3 teal darken-3">
+
+            <div id="control-panel" class="col s12 m3 cyan darken-2">
               
               <div style="margin-bottom: 30px;">
-                <a id="resetBtn" class="waves-effect waves-light btn-small" href="javascript:void(0);">
-                  <i class="material-icons left">play_arrow</i>Reset</a>
-                <a id="playBtn" class="waves-effect waves-light btn-small" href="javascript:void(0);" 
-                  onclick="stopSimulation();return false"><i class="material-icons left"></i>Pause / Resume</a>
+                <a id="resetBtn" class="waves-effect waves-light btn-small cyan lighten-1" href="javascript:void(0);"
+                  style="margin-bottom: 5px;">
+                  <i class="material-icons left">refresh</i>
+                  Reset
+                </a>
+                <a id="playBtn" class="waves-effect waves-light btn-small cyan lighten-1" href="javascript:void(0);"
+                  style="margin-bottom: 5px;" 
+                  onclick="pauseSimulation(this);return false">
+                  <i class="material-icons left">pause</i>
+                  Pause
+                </a>
               </div>
   
               <form action="#" class="font-1">

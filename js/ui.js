@@ -97,13 +97,19 @@ function Reset() {
   loop();
 }
 
-// Pause the simulation
-function stopSimulation() {
+// Pause or resume the simulation
+function pauseSimulation(el) {
   paused = !paused;
   if (paused) {
     noLoop();
+    // change text and icon
+    el.childNodes[2].textContent = "play";
+    el.childNodes[1].textContent = "play_arrow";
   } else {
     loop();
+    // change text and icon
+    el.childNodes[2].textContent = "pause";
+    el.childNodes[1].textContent = "pause";
   }
 }
 
