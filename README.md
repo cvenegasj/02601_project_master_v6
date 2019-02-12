@@ -3,6 +3,7 @@
 Final project for the Course 02-601: Programming for Scientists from Carnegie Mellon University, Fall 2018. 
 
 The running app can be accessed from <a href="https://aseibel42.github.io/02601_project_master_v6/" target="_blank">here</a>.
+Updated UI: <a href="https://cvenegasj.github.io/02601_project_master_v6/" target="_blank">https://cvenegasj.github.io/02601_project_master_v6/</a>
 
 [![Screenshot of app 1](https://cvenegasj.github.io//02601_project_master_v6/img_3.png)](https://aseibel42.github.io/02601_project_master_v6/)
 
